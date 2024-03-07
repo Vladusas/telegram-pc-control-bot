@@ -1,6 +1,7 @@
 import os
 import telebot
 from wakeonlan import send_magic_packet
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
 ################################--Setup--###################################################
 
@@ -23,6 +24,12 @@ Already_off = "The computer is already off"
 Status_on = "The computer is on."
 Status_off = "The computer is off."
 No_permission = "You cannot use this command!"
+Choose_option = "Choose an option:"
+
+#Button names.
+btn_on = "Remote On"
+btn_off = "Remote Off"
+btn_satus = "Status"
 
 ################################--Functions--###################################################
 
@@ -40,7 +47,16 @@ def ping(host):
         status = "false"
     return(status)
 
+def keyboard():
+    markup = ReplyKeyboardMarkup(row_width=2)
+    markup.add(KeyboardButton(btn_on), KeyboardButton(btn_off), KeyboardButton(btn_satus))
+    return markup
+
 ################################--Commands--####################################################
+
+@bot.message_handler(commands=["start"])
+def start_message(message):
+    bot.send_message(message.chat.id, Choose_option, reply_markup=keyboard())
 
 #remotely turn on
 @bot.message_handler(commands=['remote_on'])
@@ -67,7 +83,7 @@ def handle_status(message):
 
 #remotely turn off
 @bot.message_handler(commands=['remote_off'])
-def handle_status(message):
+def handle_off(message):
     if message.from_user.id == user_id:
         if ping(pc_hostname) == "true":
             bot.send_message(message.chat.id, Turning_off)
@@ -76,5 +92,35 @@ def handle_status(message):
             bot.send_message(message.chat.id, Already_off)
     else:
         bot.send_message(message.chat.id, No_permission)
+
+@bot.message_handler(func=lambda message:True)
+def all_messages(message):
+    if message.text == btn_on:
+        if message.from_user.id == user_id:
+            if ping(pc_hostname) == "false":
+                bot.send_message(message.chat.id, Turning_on)
+                pcon()
+            else:
+                bot.send_message(message.chat.id, Already_on)
+        else:
+            bot.send_message(message.chat.id, No_permission)
+    elif message.text == btn_off:
+        if message.from_user.id == user_id:
+            if ping(pc_hostname) == "true":
+                bot.send_message(message.chat.id, Turning_off)
+                pcoff()
+            else:
+                bot.send_message(message.chat.id, Already_off)
+        else:
+            bot.send_message(message.chat.id, No_permission)
+    elif message.text == btn_satus:
+        if message.from_user.id == user_id:
+            if ping(pc_hostname) == "true":
+                bot.send_message(message.chat.id, Status_on)
+            else:
+                bot.send_message(message.chat.id, Status_off)
+        else:
+            bot.send_message(message.chat.id, No_permission)
+ 
 
 bot.infinity_polling()
