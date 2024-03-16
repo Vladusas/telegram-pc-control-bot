@@ -26,6 +26,7 @@ Telegram bot that allows you to remotely turn your computer on or off and view i
    - `/remote_on` To power on your computer remotely.
    - `/remote_off` To power off your computer remotely.
    - `/status` To check the status of your computer.
+8. Run `./start.sh`.
 
 Note that to power your computer off using this bot you have to install an openssh server.
 Also note that this script has to be installed on another computer that is running Linux, is on the same local network and preferably is always on.
